@@ -1,4 +1,5 @@
 const pool = require("../db");
+const jwt = require("jsonwebtoken");
 
 const getPosts = (req, res) => {
   // Perform CRUD operations or any other necessary business logic
@@ -46,26 +47,37 @@ const createCategoryTable = (req, res) => {
     });
 };
 const addCategory = (req, res) => {
-  const { title, description, imageUrl } = req.body;
+  const bearerHeader = req.headers["authorization"];
+  const bearer = bearerHeader.split(" ");
+  const bearerToken = bearer[1];
+  jwt.verify(bearerToken, "123", (err, authData) => {
+    if (err) {
+      console.log("Log err", err);
+      res.sendStatus(403);
+    } else {
+      const { title, description, imageUrl } = req.body;
 
-  const addCategoryQuery = `
-    INSERT INTO category (title, description, imageUrl)
-    VALUES ($1, $2, $3)
-    RETURNING *
-  `;
+      const addCategoryQuery = `
+        INSERT INTO category (title, description, imageUrl)
+        VALUES ($1, $2, $3)
+        RETURNING *
+      `;
 
-  pool
-    .query(addCategoryQuery, [title, description, imageUrl])
-    .then((result) => {
-      const addedCategory = result.rows[0];
-      console.log("log result", result);
-      console.log(`Category with ID ${addedCategory.id} added successfully`);
-      res.status(201).json(addedCategory);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("Internal Server Error");
-    });
+      pool
+        .query(addCategoryQuery, [title, description, imageUrl])
+        .then((result) => {
+          const addedCategory = result.rows[0];
+          console.log(
+            `Category with ID ${addedCategory.id} added successfully`
+          );
+          res.status(201).json(addedCategory);
+        })
+        .catch((err) => {
+          console.error(err);
+          res.status(500).send("Internal Server Error");
+        });
+    }
+  });
 };
 
 const getAllCategories = (req, res) => {

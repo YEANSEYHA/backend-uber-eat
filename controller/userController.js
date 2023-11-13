@@ -1,4 +1,5 @@
 const pool = require("../db");
+const jwt = require("jsonwebtoken");
 
 const createUserTable = (req, res) => {
   const tableExistsQuery = `
@@ -40,10 +41,22 @@ const createUserTable = (req, res) => {
     });
 };
 
-module.exports = {
-  createUserTable,
+const handleLogin = (req, res) => {
+  // Mock user
+  const user = {
+    id: 1,
+    username: "seyha",
+    email: "seyha@gmail.com",
+  };
+
+  jwt.sign({ user: user }, "123", (err, token) => {
+    res.json({
+      token: token,
+    });
+  });
 };
 
 module.exports = {
   createUserTable,
+  handleLogin,
 };
