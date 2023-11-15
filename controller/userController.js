@@ -42,18 +42,28 @@ const createUserTable = (req, res) => {
 };
 
 const handleLogin = (req, res) => {
+  const { password, email } = req.body;
   // Mock user
   const user = {
     id: 1,
     username: "seyha",
     email: "seyha@gmail.com",
+    password: 123456789,
   };
 
-  jwt.sign({ user: user }, "123", (err, token) => {
-    res.json({
-      token: token,
+  if (password === user.password && email === user.email) {
+    console.log("Match user");
+    jwt.sign({ user: user }, "123", (err, token) => {
+      res.json({
+        token: token,
+      });
     });
-  });
+  } else {
+    console.log("Invalid user");
+    res.status(401).json({
+      error: "Invalid credentials",
+    });
+  }
 };
 
 module.exports = {
